@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 
 function getStoredValue(key, initialValue, storageType) {
  const storedValue = JSON.parse(storageType.getItem(key));
@@ -18,15 +18,13 @@ export default function useStorage(key, initialValue) {
    getStoredValue(key, initialValue, localStorage)
  );
 
- const setBothValues = useCallback((newValue) => {
-   setValue(newValue);
-   localStorage.setItem(key, JSON.stringify(newValue));
-   sessionStorage.setItem(key, JSON.stringify(newValue));
- }, [key]);
-
  useEffect(() => {
-   setBothValues(value);
- }, [value, key, setBothValues]);
+   setValue((prevValue) => {
+     localStorage.setItem(key, JSON.stringify(prevValue));
+     sessionStorage.setItem(key, JSON.stringify(prevValue));
+     return prevValue;
+   });
+ }, [value, key]);
 
- return [value, setBothValues];
+ return [value, setValue];
 }
